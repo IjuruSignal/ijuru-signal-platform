@@ -4,7 +4,7 @@ set -e
 # Handle OpenRouter / AI environment setup
 if [ -n "$OPENROUTER_API_KEY" ]; then
   export AI_API_KEY="${AI_API_KEY:-$OPENROUTER_API_KEY}"
-  export AI_MODEL="${AI_MODEL:-google/gemini-2.0-flash-001}"
+  export AI_MODEL="${AI_MODEL:-openrouter/free}"
   export AI_PROVIDER="${AI_PROVIDER:-openai-compatible}"
   export AI_BASE_URL="${AI_BASE_URL:-https://openrouter.ai/api/v1}"
   export AI_ALLOWED_HOSTS="${AI_ALLOWED_HOSTS:-openrouter.ai}"

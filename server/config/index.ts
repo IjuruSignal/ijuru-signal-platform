@@ -118,7 +118,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   // If AI_PROVIDER is not explicitly set (or is empty), but OPENROUTER_API_KEY or AI_API_KEY is provided
   if (!rawAiProvider && (openrouterApiKey || generalApiKey)) {
     const apiKey = (openrouterApiKey || generalApiKey)!;
-    const model = env.AI_MODEL?.trim() || 'google/gemini-2.5-flash';
+    const model = env.AI_MODEL?.trim() || 'openrouter/free';
     const rawBaseUrl = env.AI_BASE_URL?.trim() || 'https://openrouter.ai/api';
 
     let url: URL;
@@ -172,8 +172,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     if (aiProvider === 'disabled') {
       ai = Object.freeze({ provider: 'disabled' });
     } else {
-      // Default to Google Gemini 2.0 Flash / OpenRouter free models if not specified
-      const model = env.AI_MODEL?.trim() || (openrouterApiKey || env.AI_BASE_URL?.includes('openrouter') ? 'google/gemini-2.0-flash-001' : undefined);
+      // Default to openrouter/free if not specified
+      const model = env.AI_MODEL?.trim() || (openrouterApiKey || env.AI_BASE_URL?.includes('openrouter') ? 'openrouter/free' : undefined);
       if (!model || typeof model !== 'string' || !model.trim()) {
         throw new Error('AI_MODEL is required when AI_PROVIDER is enabled');
       }

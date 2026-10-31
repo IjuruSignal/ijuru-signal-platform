@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
           (typeof modelOverride === 'string' && modelOverride.trim()) ||
           (config.ai.provider !== 'disabled' ? config.ai.model : '') ||
           process.env.AI_MODEL?.trim() ||
-          'google/gemini-2.5-flash';
+          'openrouter/free';
 
         const host = new URL(baseUrl).hostname;
         const aiClient = createProvider({

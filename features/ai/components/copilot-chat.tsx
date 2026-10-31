@@ -73,7 +73,7 @@ export function CopilotChat({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [apiKeyOverride, setApiKeyOverride] = useState("");
-  const [modelOverride, setModelOverride] = useState("google/gemini-2.5-flash");
+  const [modelOverride, setModelOverride] = useState("openrouter/free");
   const [keyDialogOpen, setKeyDialogOpen] = useState(false);
 
   const [messages, setMessages] = useState<Message[]>([
@@ -93,8 +93,8 @@ export function CopilotChat({
     const savedModel =
       typeof window !== "undefined"
         ? window.localStorage.getItem("ijuru_openrouter_model") ||
-          "google/gemini-2.5-flash"
-        : "google/gemini-2.5-flash";
+          "openrouter/free"
+        : "openrouter/free";
     if (savedKey) setApiKeyOverride(savedKey);
     if (savedModel) setModelOverride(savedModel);
   }, []);
@@ -226,7 +226,7 @@ export function CopilotChat({
                   type="text"
                   value={modelOverride}
                   onChange={(e) => setModelOverride(e.target.value)}
-                  placeholder="google/gemini-2.5-flash or openai/gpt-4o-mini"
+                  placeholder="openrouter/free or meta-llama/llama-3.3-70b-instruct:free"
                 />
               </div>
             </div>
