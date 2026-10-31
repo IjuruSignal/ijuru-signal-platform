@@ -13,7 +13,7 @@ In Rwanda, over **65% of the population relies on rain-fed agriculture** across 
 - Conversely, satellite models lack **ground truth**: an NDVI drop might be a cloud shadow, recent terrace grading, or dry topsoil—not necessarily crop disease.
 - Commercial weather apps give generic temperatures but lack historical 30-year climatological context or Rwandan agro-ecological zoning.
 
-### The Solution: Ijuru Signal
+### The Solution: Ijuru Signalkwizeramugishaolivier
 **Ijuru Signal** bridges high-resolution environmental models with local human ground verification across all **30 districts of Rwanda**:
 1. **Live Numerical Forecasting:** 7-day weather, precipitation probability, daily rainfall volume, and evapotranspiration (ET0) via Open-Meteo & ECMWF IFS.
 2. **30-Year Historical Anomaly:** Compares current seasonal precipitation against 30-year ECMWF ERA5 reanalysis normals (1991–2020) to detect true drought or water excess.

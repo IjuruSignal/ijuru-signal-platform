@@ -585,52 +585,110 @@ export function LandingPage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Member 1 */}
-            <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center">
-              <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#2ec4b6] flex items-center justify-center text-xl font-bold border-2 border-[#2ec4b6] mb-4 shadow-sm">
-                TL
+            {/* Kwizera Mugisha Olivier */}
+            <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center">
+                <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#2ec4b6] flex items-center justify-center text-xl font-extrabold border-2 border-[#2ec4b6] mb-4 shadow-sm">
+                  KO
+                </div>
+                <h4 className="font-extrabold text-base text-[#132e36] leading-snug">Kwizera Mugisha Olivier</h4>
+                <div className="text-xs font-bold text-[#1b7a63] mt-0.5">Team Lead &amp; System Architect</div>
+                <p className="text-xs text-gray-600 mt-2.5 leading-relaxed">
+                  Platform architecture, dual-engine persistence (PostgreSQL 18 &amp; SQLite), Dockerization, and cloud deployment on ThalesOps.
+                </p>
               </div>
-              <h4 className="font-bold text-base text-[#132e36]">Team Member 1</h4>
-              <div className="text-xs font-semibold text-[#1b7a63] mt-0.5">Project Lead &amp; Architect</div>
-              <p className="text-xs text-gray-600 mt-3 leading-relaxed">
-                System architecture, dual persistence design (Postgres 18 &amp; SQLite), and technical deployment on ThalesOps.
-              </p>
+              <div className="mt-4 pt-3 border-t border-gray-200 w-full flex flex-col gap-1 text-[11px] text-gray-500">
+                <a
+                  href="mailto:kwizeramugishaolivier0@gmail.com"
+                  className="text-[#132e36] hover:text-[#1b7a63] hover:underline font-mono truncate"
+                >
+                  kwizeramugishaolivier0@gmail.com
+                </a>
+                <a
+                  href="https://github.com/oliviermugishak"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#2ec4b6] hover:underline font-semibold"
+                >
+                  github.com/oliviermugishak &rarr;
+                </a>
+              </div>
             </div>
 
-            {/* Member 2 */}
-            <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center">
-              <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#e5a93b] flex items-center justify-center text-xl font-bold border-2 border-[#e5a93b] mb-4 shadow-sm">
-                GE
+            {/* Ajeneza Thierry */}
+            <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center">
+                <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#e5a93b] flex items-center justify-center text-xl font-extrabold border-2 border-[#e5a93b] mb-4 shadow-sm">
+                  AT
+                </div>
+                <h4 className="font-extrabold text-base text-[#132e36] leading-snug">Ajeneza Thierry</h4>
+                <div className="text-xs font-bold text-[#92400e] mt-0.5">Telecom &amp; USSD Gateway Lead</div>
+                <p className="text-xs text-gray-600 mt-2.5 leading-relaxed">
+                  Africa&apos;s Talking USSD protocol, sub-150ms webhook responses, GSM 160-char formatting, and interactive simulator.
+                </p>
               </div>
-              <h4 className="font-bold text-base text-[#132e36]">Team Member 2</h4>
-              <div className="text-xs font-semibold text-[#92400e] mt-0.5">Geospatial &amp; Climate Engineer</div>
-              <p className="text-xs text-gray-600 mt-3 leading-relaxed">
-                Sentinel-2 NDVI ingestion, CHIRPS 30-year climate anomaly integration, and Rwanda 30-district microclimate modeling.
-              </p>
+              <div className="mt-4 pt-3 border-t border-gray-200 w-full flex flex-col gap-1 text-[11px] text-gray-500">
+                <a
+                  href="mailto:ajeneza22@gmail.com"
+                  className="text-[#132e36] hover:text-[#1b7a63] hover:underline font-mono truncate"
+                >
+                  ajeneza22@gmail.com
+                </a>
+                <a
+                  href="https://github.com/thierryaj8"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#e5a93b] hover:underline font-semibold"
+                >
+                  github.com/thierryaj8 &rarr;
+                </a>
+              </div>
             </div>
 
-            {/* Member 3 */}
-            <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center">
-              <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#38bdf8] flex items-center justify-center text-xl font-bold border-2 border-[#38bdf8] mb-4 shadow-sm">
-                TC
+            {/* Kamanzi Tony */}
+            <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center">
+                <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#38bdf8] flex items-center justify-center text-xl font-extrabold border-2 border-[#38bdf8] mb-4 shadow-sm">
+                  KT
+                </div>
+                <h4 className="font-extrabold text-base text-[#132e36] leading-snug">Kamanzi Tony</h4>
+                <div className="text-xs font-bold text-[#0369a1] mt-0.5">Climate &amp; Geospatial Lead</div>
+                <p className="text-xs text-gray-600 mt-2.5 leading-relaxed">
+                  Sentinel-2 NDVI vegetative indices, CHIRPS 30-year rainfall anomaly modeling, and Rwanda 30-district microclimate centroids.
+                </p>
               </div>
-              <h4 className="font-bold text-base text-[#132e36]">Team Member 3</h4>
-              <div className="text-xs font-semibold text-[#0369a1] mt-0.5">Telecom &amp; USSD Specialist</div>
-              <p className="text-xs text-gray-600 mt-3 leading-relaxed">
-                Africa&apos;s Talking USSD gateway engineering, GSM 160-char protocol optimization, and Kinyarwanda dialogue flows.
-              </p>
+              <div className="mt-4 pt-3 border-t border-gray-200 w-full flex flex-col gap-1 text-[11px] text-gray-500">
+                <a
+                  href="mailto:kamanzitony06@gmail.com"
+                  className="text-[#132e36] hover:text-[#1b7a63] hover:underline font-mono truncate"
+                >
+                  kamanzitony06@gmail.com
+                </a>
+                <span className="text-gray-400 font-mono">Geospatial Analytics</span>
+              </div>
             </div>
 
-            {/* Member 4 */}
-            <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center">
-              <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#2ec4b6] flex items-center justify-center text-xl font-bold border-2 border-[#2ec4b6] mb-4 shadow-sm">
-                AG
+            {/* Leon Le Grand */}
+            <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex flex-col items-center">
+                <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#2ec4b6] flex items-center justify-center text-xl font-extrabold border-2 border-[#2ec4b6] mb-4 shadow-sm">
+                  LL
+                </div>
+                <h4 className="font-extrabold text-base text-[#132e36] leading-snug">Leon Le Grand</h4>
+                <div className="text-xs font-bold text-[#1b7a63] mt-0.5">Agronomy &amp; Field Lead</div>
+                <p className="text-xs text-gray-600 mt-2.5 leading-relaxed">
+                  Ground-truth human verification workflows, optimistic concurrency locking, cooperative liaison, and crop calendars.
+                </p>
               </div>
-              <h4 className="font-bold text-base text-[#132e36]">Team Member 4</h4>
-              <div className="text-xs font-semibold text-[#1b7a63] mt-0.5">Agronomy &amp; Field Lead</div>
-              <p className="text-xs text-gray-600 mt-3 leading-relaxed">
-                Ground-truth field check workflows, agricultural cooperative partnerships, and crop calendar calibration.
-              </p>
+              <div className="mt-4 pt-3 border-t border-gray-200 w-full flex flex-col gap-1 text-[11px] text-gray-500">
+                <a
+                  href="mailto:leonstarclench@gmaill.com"
+                  className="text-[#132e36] hover:text-[#1b7a63] hover:underline font-mono truncate"
+                >
+                  leonstarclench@gmaill.com
+                </a>
+                <span className="text-gray-400 font-mono">Field Operations</span>
+              </div>
             </div>
           </div>
         </div>
