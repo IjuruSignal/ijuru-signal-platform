@@ -72,8 +72,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     throw new Error(`Invalid NODE_ENV: must be development, production, or test`);
   }
 
-  // Database configuration (auto-detect postgres if DATABASE_URL is present)
-  const dbProvider = env.DB_PROVIDER || (env.DATABASE_URL ? 'postgres' : 'sqlite');
+  // Database configuration (prioritize postgres if DATABASE_URL or POSTGRES_URL is provided)
+  const rawDbUrl = (env.DATABASE_URL || env.POSTGRES_URL || env.POSTGRESQL_URL || '').trim();
+  const dbProvider = rawDbUrl ? 'postgres' : (env.DB_PROVIDER || 'sqlite');
   if (!['sqlite', 'postgres'].includes(dbProvider)) {
     throw new Error(`Invalid DB_PROVIDER: must be sqlite or postgres`);
   }
@@ -89,7 +90,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
       sqlitePath: sqlitePath.trim(),
     });
   } else {
-    const databaseUrl = env.DATABASE_URL;
+    const databaseUrl = rawDbUrl;
     if (!databaseUrl || typeof databaseUrl !== 'string') {
       throw new Error('DATABASE_URL is required when DB_PROVIDER=postgres');
     }

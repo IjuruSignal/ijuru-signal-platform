@@ -10,8 +10,9 @@ if [ -n "$OPENROUTER_API_KEY" ]; then
   export AI_ALLOWED_HOSTS="${AI_ALLOWED_HOSTS:-openrouter.ai}"
 fi
 
-# Auto-detect DB_PROVIDER if DATABASE_URL is set (e.g. Render Postgres)
-if [ -n "$DATABASE_URL" ] && [ -z "$DB_PROVIDER" ]; then
+# Auto-detect DB_PROVIDER if DATABASE_URL or POSTGRES_URL is set (prioritize Postgres)
+if [ -n "$DATABASE_URL" ] || [ -n "$POSTGRES_URL" ] || [ -n "$POSTGRESQL_URL" ]; then
+  export DATABASE_URL="${DATABASE_URL:-${POSTGRES_URL:-$POSTGRESQL_URL}}"
   export DB_PROVIDER="postgres"
 fi
 

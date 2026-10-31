@@ -22,7 +22,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CopilotChat } from "@/features/ai/components/copilot-chat";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -202,9 +201,30 @@ export default async function DistrictPage({ params }: Props) {
           </Card>
         </div>
 
-        {/* AI Copilot specifically tuned to this district */}
+        {/* Dedicated AI Assistant Callout */}
         <section aria-label="District AI Assistant">
-          <CopilotChat districtId={district.id} districtName={district.name} />
+          <Card className="bg-gradient-to-r from-[#132e36] to-[#195c70] text-[#f3f4ee] border-none shadow-md">
+            <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-[#e3ed8c] text-[#132e36] flex items-center justify-center shrink-0">
+                  <Sparkles className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">
+                    Ask Climate AI Copilot about {district.name}
+                  </h3>
+                  <p className="text-xs text-[#b8d0cb] mt-0.5">
+                    Synthesize {district.name}&apos;s {district.agroZone} climate data, crops, rainfall baseline, and field observations.
+                  </p>
+                </div>
+              </div>
+              <Button asChild variant="signal" size="sm" className="shrink-0 font-bold">
+                <Link href={`/assistant?district=${district.id}`}>
+                  <span>Open Copilot in Assistant</span>
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </section>
       </div>
     </AppShell>

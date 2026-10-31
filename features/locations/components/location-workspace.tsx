@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { RwandaMap, MapLayerKind } from "./rwanda-map";
-import { CopilotChat } from "@/features/ai/components/copilot-chat";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -613,9 +612,31 @@ export function LocationWorkspace() {
           </Card>
         </section>
 
-        {/* Embedded Grounded Climate AI Assistant */}
+        {/* Climate AI Assistant Prompt Banner */}
         <section aria-label="Climate Copilot assistant">
-          <CopilotChat districtId={selectedId} districtName={selectedName} />
+          <Card className="bg-gradient-to-r from-[#132e36] to-[#195c70] text-[#f3f4ee] border-none shadow-md">
+            <CardContent className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-[#e3ed8c] text-[#132e36] flex items-center justify-center shrink-0">
+                  <Sparkles className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">
+                    Need AI synthesis for {selectedName} District?
+                  </h3>
+                  <p className="text-xs text-[#b8d0cb] mt-0.5">
+                    Query live forecast, 30-year rainfall anomaly, satellite vegetation, and ground checks in natural language.
+                  </p>
+                </div>
+              </div>
+              <Button asChild variant="signal" size="sm" className="shrink-0 font-bold">
+                <Link href={`/assistant?district=${selectedId}`}>
+                  <span>Open AI Assistant</span>
+                  <ArrowUpRight className="size-3.5 ml-1" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
         </section>
 
         {/* Accessible Sortable District Table (Map-Free Path) */}

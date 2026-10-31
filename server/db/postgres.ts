@@ -19,8 +19,19 @@ export function createPool(databaseUrl: string, options: { max?: number; idleTim
   if (!databaseUrl || typeof databaseUrl !== 'string') {
     throw new Error('A valid PostgreSQL database URL is required');
   }
+
+  let ssl: any = false;
+  try {
+    const parsed = new URL(databaseUrl);
+    const isLocal = ['localhost', '127.0.0.1'].includes(parsed.hostname);
+    if (!isLocal) {
+      ssl = { rejectUnauthorized: false };
+    }
+  } catch {}
+
   const pool = new Pool({
     connectionString: databaseUrl,
+    ssl,
     max: options.max || 10,
     idleTimeoutMillis: options.idleTimeoutMillis || 10000,
     connectionTimeoutMillis: options.connectionTimeoutMillis || 5000,

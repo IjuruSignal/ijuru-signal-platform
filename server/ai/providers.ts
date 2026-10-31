@@ -12,7 +12,7 @@ export interface ProviderConfig {
 }
 
 export interface ModelMessage {
-  role: 'user' | 'assistant';
+  role: 'system' | 'user' | 'assistant';
   text: string;
 }
 
@@ -66,17 +66,19 @@ export function createProvider(input: any, transport: typeof fetch = fetch): Pro
       if (
         !Array.isArray(messages) ||
         messages.length === 0 ||
-        messages.some((m) => !['user', 'assistant'].includes(m.role) || typeof m.text !== 'string' || m.text.length > 20000)
+        messages.some((m) => !['system', 'user', 'assistant'].includes(m.role) || typeof m.text !== 'string' || m.text.length > 20000)
       ) {
         throw new Error('Invalid messages');
       }
       const anthropic = config.provider === 'anthropic';
-      const url = `${config.baseUrl}${anthropic ? '/v1/messages' : '/v1/chat/completions'}`;
+      const cleanBase = (config.baseUrl || '').replace(/\/v1\/?$/, '');
+      const url = `${cleanBase}${anthropic ? '/v1/messages' : '/v1/chat/completions'}`;
       const body = anthropic
         ? {
             model: config.model,
             max_tokens: config.maxOutputTokens,
-            messages: messages.map((m) => ({ role: m.role, content: m.text })),
+            messages: messages.filter((m) => m.role !== 'system').map((m) => ({ role: m.role, content: m.text })),
+            system: messages.find((m) => m.role === 'system')?.text,
           }
         : {
             model: config.model,
@@ -98,7 +100,11 @@ export function createProvider(input: any, transport: typeof fetch = fetch): Pro
             'content-type': 'application/json',
             ...(anthropic
               ? { 'x-api-key': config.apiKey!, 'anthropic-version': '2023-06-01' }
-              : { authorization: `Bearer ${config.apiKey}` }),
+              : {
+                  authorization: `Bearer ${config.apiKey}`,
+                  'HTTP-Referer': 'https://ijuru.rw',
+                  'X-Title': 'Ijuru Signal',
+                }),
           },
           body: JSON.stringify(body),
         });
