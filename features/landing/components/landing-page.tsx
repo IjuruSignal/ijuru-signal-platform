@@ -618,13 +618,13 @@ export function LandingPage() {
             {/* Ajeneza Thierry */}
             <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-col items-center">
-                <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#e5a93b] flex items-center justify-center text-xl font-extrabold border-2 border-[#e5a93b] mb-4 shadow-sm">
+                <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#2ec4b6] flex items-center justify-center text-xl font-extrabold border-2 border-[#2ec4b6] mb-4 shadow-sm">
                   AT
                 </div>
                 <h4 className="font-extrabold text-base text-[#132e36] leading-snug">Ajeneza Thierry</h4>
-                <div className="text-xs font-bold text-[#92400e] mt-0.5">Telecom &amp; USSD Gateway Lead</div>
+                <div className="text-xs font-bold text-[#1b7a63] mt-0.5">Agronomy &amp; Field Lead</div>
                 <p className="text-xs text-gray-600 mt-2.5 leading-relaxed">
-                  Africa&apos;s Talking USSD protocol, sub-150ms webhook responses, GSM 160-char formatting, and interactive simulator.
+                  Ground-truth human verification workflows, optimistic concurrency locking, cooperative liaison, and crop calendars.
                 </p>
               </div>
               <div className="mt-4 pt-3 border-t border-gray-200 w-full flex flex-col gap-1 text-[11px] text-gray-500">
@@ -638,7 +638,7 @@ export function LandingPage() {
                   href="https://github.com/thierryaj8"
                   target="_blank"
                   rel="noreferrer"
-                  className="text-[#e5a93b] hover:underline font-semibold"
+                  className="text-[#2ec4b6] hover:underline font-semibold"
                 >
                   github.com/thierryaj8 &rarr;
                 </a>
@@ -671,13 +671,13 @@ export function LandingPage() {
             {/* Leon Le Grand */}
             <div className="bg-[#f8fafc] p-6 rounded-2xl border border-[#d6dedb] text-center flex flex-col items-center justify-between shadow-sm hover:shadow-md transition-shadow">
               <div className="flex flex-col items-center">
-                <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#2ec4b6] flex items-center justify-center text-xl font-extrabold border-2 border-[#2ec4b6] mb-4 shadow-sm">
+                <div className="size-20 rounded-full bg-gradient-to-br from-[#132e36] to-[#1b434f] text-[#e5a93b] flex items-center justify-center text-xl font-extrabold border-2 border-[#e5a93b] mb-4 shadow-sm">
                   LL
                 </div>
                 <h4 className="font-extrabold text-base text-[#132e36] leading-snug">Leon Le Grand</h4>
-                <div className="text-xs font-bold text-[#1b7a63] mt-0.5">Agronomy &amp; Field Lead</div>
+                <div className="text-xs font-bold text-[#92400e] mt-0.5">Telecom &amp; USSD Gateway Lead</div>
                 <p className="text-xs text-gray-600 mt-2.5 leading-relaxed">
-                  Ground-truth human verification workflows, optimistic concurrency locking, cooperative liaison, and crop calendars.
+                  Africa&apos;s Talking USSD protocol, sub-150ms webhook responses, GSM 160-char formatting, and interactive simulator.
                 </p>
               </div>
               <div className="mt-4 pt-3 border-t border-gray-200 w-full flex flex-col gap-1 text-[11px] text-gray-500">
@@ -687,7 +687,7 @@ export function LandingPage() {
                 >
                   leonstarclench@gmaill.com
                 </a>
-                <span className="text-gray-400 font-mono">Field Operations</span>
+                <span className="text-gray-400 font-mono">Telecom Systems</span>
               </div>
             </div>
           </div>
@@ -708,18 +708,6 @@ export function LandingPage() {
             <p className="text-xs text-[#8bc3b9] max-w-sm leading-relaxed">
               Empowering smallholder farmers, agronomists, and cooperatives across all 30 districts of Rwanda with authoritative climate intelligence and 2G USSD access.
             </p>
-            <div className="mt-4 flex items-center gap-2 text-xs text-white">
-              <span className="size-2 rounded-full bg-[#2ec4b6] animate-pulse" />
-              <span>Production URL:</span>
-              <a
-                href="https://ijuru-signal-platform-1.apps.thalesops.com"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[#2ec4b6] hover:underline font-mono"
-              >
-                ijuru-signal-platform-1.apps.thalesops.com
-              </a>
-            </div>
           </div>
 
           {/* Quick Platform Links */}
