@@ -36,8 +36,14 @@ interface AppShellProps {
 const NAV_ITEMS = [
   {
     href: "/",
+    label: "Home & Overview",
+    shortLabel: "Home",
+    Icon: Radar,
+  },
+  {
+    href: "/dashboard",
     label: "National & District Map",
-    shortLabel: "Explore",
+    shortLabel: "Map",
     Icon: Compass,
   },
   {
@@ -78,6 +84,7 @@ export function AppShell({
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
+    if (href === "/dashboard") return pathname === "/dashboard" || pathname === "/dashboards";
     if (href.startsWith("/places")) return pathname.startsWith("/places");
     return pathname.startsWith(href);
   };

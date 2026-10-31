@@ -1,3 +1,5 @@
-import { LocationWorkspace } from "../features/locations/components/location-workspace";
+import { LandingPage } from "@/features/landing/components/landing-page";
 
-export default function Home() { return <LocationWorkspace />; }
+export default function Home() {
+  return <LandingPage />;
+}
