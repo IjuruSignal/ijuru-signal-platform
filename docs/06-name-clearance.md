@@ -1,0 +1,3 @@
+# Ijuru Signal: name clearance
+
+The name, domain and trademark have not been cleared. Search exact and similar spellings, sounds, translations, business names, social handles and app stores; review results with a Rwanda-qualified IP professional. Request an official search via the [Office of the Registrar General trademark search form](https://org.rdb.rw/intellectual-property-rights/application-forms/) and use [WIPO's Global Brand Database](https://branddb.wipo.int/) as a supplement. Check live domain availability with a registrar; no name or domain has been reserved or purchased. Confirm current costs and requirements before applying.

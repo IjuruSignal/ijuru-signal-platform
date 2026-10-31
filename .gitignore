@@ -1,0 +1,16 @@
+node_modules
+.next
+.env*
+!.env.example
+*.tsbuildinfo
+.impeccable/
+prototype
+
+# Local databases, uploads and secrets
+data/
+.env.postgres
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+!.env.postgres.example
+*.pdf
