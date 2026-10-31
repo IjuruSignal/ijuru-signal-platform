@@ -177,7 +177,7 @@ export async function handleUssdRequest({
         `Today: ${today?.tempMax ?? 24}°C | ${today?.precipProb ?? 30}% Rain (${today?.precipMm ?? 0}mm)`,
         `Tomorrow: ${tomorrow?.tempMax ?? 24}°C | ${tomorrow?.precipProb ?? 40}% Rain (${tomorrow?.precipMm ?? 0}mm)`,
         `Wind: ${weather.windSpeedKmh}km/h | Hum: ${weather.humidity}%`,
-        `Meteo Rwanda (meteorwanda.gov.rw)`,
+        `Ijuru Signal (ijuru.rw)`,
       ].join('\n');
     }
 
@@ -189,7 +189,7 @@ export async function handleUssdRequest({
         `5-Day Rain Total: ${fiveDayTotal} mm`,
         `30yr Baseline: ${signals.rainfall?.baselineMeanMm ?? 100}mm (Norm)`,
         `Anomaly: ${diffSign}${signals.rainfall?.diffMm ?? 0}mm (${signals.rainfall?.status ?? 'Near Normal'})`,
-        `Meteo Rwanda (meteorwanda.gov.rw)`,
+        `Ijuru Signal (ijuru.rw)`,
       ].join('\n');
     }
 
@@ -214,7 +214,7 @@ export async function handleUssdRequest({
         `Today: ${weather.temperatureC}°C, ${today?.precipProb ?? 35}% Rain (${today?.precipMm ?? 0}mm)`,
         `Tomorrow: ${tomorrow?.tempMax ?? 24}°C, ${tomorrow?.precipProb ?? 40}% Rain`,
         `5-Day Total: ${fiveDayTotal}mm | Soil: ${signals.hydrology?.soilMoisturePct ?? 45}%`,
-        `Meteo Rwanda`,
+        `Ijuru Signal (ijuru.rw)`,
       ].join('\n');
     }
   }

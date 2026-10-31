@@ -44,7 +44,7 @@ test('USSD Level 3: Selecting Rain Outlook (2*1*1) returns today/tomorrow rain p
   assert.ok(response.includes('Today:'));
   assert.ok(response.includes('Tomorrow:'));
   assert.ok(response.includes('% Rain'));
-  assert.ok(response.includes('Meteo Rwanda'));
+  assert.ok(response.includes('Ijuru Signal'));
 });
 
 test('USSD Level 3: Selecting 5-Day Rainfall (2*1*2) returns cumulative mm and anomaly with END prefix', async () => {
