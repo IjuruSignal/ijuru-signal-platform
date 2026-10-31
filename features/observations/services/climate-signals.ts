@@ -13,7 +13,7 @@ import {
   RWANDA_DISTRICTS,
   type DistrictMetadata,
   type RwandaProvince,
-} from '@/features/locations/data/rwanda-districts';
+} from '../../locations/data/rwanda-districts.ts';
 
 export interface DistrictCoord {
   name: string;
