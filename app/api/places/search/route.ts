@@ -3,7 +3,7 @@ import {
   RWANDA_DISTRICTS,
   findNearestDistrict,
   type DistrictMetadata,
-} from '@/features/locations/data/rwanda-districts.ts';
+} from '@/features/locations/data/rwanda-districts';
 
 export interface PlaceSearchResult {
   id: string;

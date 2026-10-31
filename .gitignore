@@ -6,8 +6,8 @@ node_modules
 .impeccable/
 prototype
 
-# Local databases, uploads and secrets
-data/
+# Local databases, uploads and secrets (root data directory only)
+/data/
 .env.postgres
 *.sqlite
 *.sqlite-wal
