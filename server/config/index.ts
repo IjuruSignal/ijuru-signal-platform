@@ -172,7 +172,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     if (aiProvider === 'disabled') {
       ai = Object.freeze({ provider: 'disabled' });
     } else {
-      const model = env.AI_MODEL;
+      // Default to Google Gemini 2.0 Flash / OpenRouter free models if not specified
+      const model = env.AI_MODEL?.trim() || (openrouterApiKey || env.AI_BASE_URL?.includes('openrouter') ? 'google/gemini-2.0-flash-001' : undefined);
       if (!model || typeof model !== 'string' || !model.trim()) {
         throw new Error('AI_MODEL is required when AI_PROVIDER is enabled');
       }
