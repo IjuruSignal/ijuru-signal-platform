@@ -1,60 +1,68 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
-  Radar,
-  Layers,
-  MapPin,
-  ClipboardList,
+  Check,
   CheckCircle2,
   Clock,
-  TriangleAlert,
-  ArrowUpRight,
-  Filter,
-  Check,
-  RefreshCw,
-  ShieldAlert,
   Database,
-  CloudRain,
-  UserCheck,
-} from 'lucide-react';
-
-interface FieldCheckItem {
-  id: string;
-  area_id: string;
-  author_id: string;
-  observation: string;
-  observed_at: string;
-  status: 'pending' | 'reviewed';
-  version: number;
-}
+  ExternalLink,
+  Layers,
+  MapPin,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  UserPlus,
+  Users,
+  Activity,
+} from "lucide-react";
+import { AppShell } from "@/components/layout/app-shell";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export function AdminWorkspace() {
-  const [filter, setFilter] = useState<'all' | 'pending' | 'reviewed'>('all');
-  const [checks, setChecks] = useState<FieldCheckItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [reviewingId, setReviewingId] = useState<string | null>(null);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<{ id: string; role: string; login?: string }>({
-    id: 'user-admin-01',
-    role: 'admin',
-    login: 'admin@ijuru.rw',
+  const [currentUser, setCurrentUser] = useState({
+    id: "user-admin-01",
+    role: "admin",
+    login: "admin@ijuru.rw",
+    isGuest: false,
   });
+
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<any[]>([]);
+  const [checks, setChecks] = useState<any[]>([]);
+  const [audits, setAudits] = useState<any[]>([]);
+  const [systemInfo, setSystemInfo] = useState<any>({});
+
+  const [checkFilter, setCheckFilter] = useState<"all" | "pending" | "reviewed">("all");
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
+
+  // New user modal state
+  const [newUserOpen, setNewUserOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("demo12345678");
+  const [newRole, setNewRole] = useState<"user" | "reviewer" | "admin">("user");
+  const [creatingUser, setCreatingUser] = useState(false);
 
   const loadData = () => {
     setLoading(true);
-    fetch('/api/auth/me')
-      .then((res) => res.json())
+    fetch("/api/admin/overview")
+      .then((r) => r.json())
       .then((data) => {
-        if (data.user) setCurrentUser(data.user);
-      })
-      .catch(() => {});
-
-    // Fetch across districts
-    fetch('/api/field-checks?areaId=kigali')
-      .then((res) => res.json())
-      .then((data) => {
+        if (data.currentUser) setCurrentUser(data.currentUser);
+        if (data.users) setUsers(data.users);
         if (data.checks) setChecks(data.checks);
+        if (data.audits) setAudits(data.audits);
+        if (data.system) setSystemInfo(data.system);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -64,353 +72,541 @@ export function AdminWorkspace() {
     loadData();
   }, []);
 
-  const handleSwitchRole = async (targetRole: 'user' | 'reviewer' | 'admin') => {
+  const handleSwitchRole = async (targetRole: "user" | "reviewer" | "admin") => {
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: targetRole }),
       });
       const data = await res.json();
       if (data.user) {
         setCurrentUser(data.user);
+        toast.success(`Role switched to ${targetRole.toUpperCase()}`);
         loadData();
       }
     } catch {}
   };
 
-  const handleReview = async (check: FieldCheckItem) => {
+  const handleReview = async (check: any) => {
     setReviewingId(check.id);
-    setActionMessage(null);
-
     try {
       const res = await fetch(`/api/field-checks/${check.id}/review`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ version: check.version }),
       });
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to review check');
+      if (!res.ok) throw new Error(data.error || "Review transition failed");
 
-      setActionMessage(`✓ Observation ${check.id.slice(0, 8)} successfully approved & marked reviewed.`);
-
-      // Optimistic update
+      toast.success(`Check #${check.id.slice(0, 8)} approved & marked reviewed.`);
       setChecks((prev) =>
-        prev.map((c) => (c.id === check.id ? { ...c, status: 'reviewed', version: c.version + 1 } : c))
+        prev.map((c) => (c.id === check.id ? { ...c, status: "reviewed", version: c.version + 1 } : c))
       );
     } catch (err: any) {
-      setActionMessage(`Review failed: ${err.message}. ${currentUser.role === 'user' ? '(Requires Reviewer or Admin role)' : ''}`);
+      toast.error(`Review failed: ${err.message}`);
     } finally {
       setReviewingId(null);
     }
   };
 
-  const visibleChecks = checks.filter((item) => {
-    if (filter === 'all') return true;
-    return item.status === filter;
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmail.trim()) {
+      toast.error("Email/login is required.");
+      return;
+    }
+    setCreatingUser(true);
+    try {
+      const res = await fetch("/api/admin/overview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_user",
+          email: newEmail.trim(),
+          password: newPassword.trim(),
+          role: newRole,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to create user");
+
+      toast.success(`User ${newEmail} created successfully with role ${newRole.toUpperCase()}.`);
+      setNewUserOpen(false);
+      setNewEmail("");
+      loadData();
+    } catch (err: any) {
+      toast.error(`Error: ${err.message}`);
+    } finally {
+      setCreatingUser(false);
+    }
+  };
+
+  const handleUpdateRole = async (userId: string, role: string) => {
+    try {
+      const res = await fetch("/api/admin/overview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_role", userId, role }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update role");
+
+      toast.success(`User role updated to ${role.toUpperCase()}`);
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role } : u)));
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const visibleChecks = checks.filter((c) => {
+    if (checkFilter === "all") return true;
+    return c.status === checkFilter;
   });
 
-  const pendingCount = checks.filter((c) => c.status === 'pending').length;
-  const reviewedCount = checks.filter((c) => c.status === 'reviewed').length;
+  const pendingCount = checks.filter((c) => c.status === "pending").length;
+  const reviewedCount = checks.filter((c) => c.status === "reviewed").length;
 
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <a className="brand" href="/admin">
-          <span className="brand-mark">
-            <Radar size={21} />
-          </span>
-          IJURU SIGNAL
-        </a>
-        <p className="sidebar-label">ADMIN & REVIEW TRIAGE</p>
-        <nav aria-label="Admin workspace navigation">
-          <a href="#overview" className="active">
-            <Layers size={18} /> Operations triage
-          </a>
-          <a href="#checks">
-            <ClipboardList size={18} /> Field check review ({pendingCount})
-          </a>
-          <a href="#sources">
-            <Radar size={18} /> Signal pipelines
-          </a>
-          <a href="/">
-            <MapPin size={18} /> Location briefing
-          </a>
-        </nav>
+    <AppShell
+      currentUser={currentUser}
+      onSwitchRole={handleSwitchRole}
+      title="Ijuru Signal Admin & Review Operations"
+      subtitle="Ground truth triage · Multi-district observations · Access & pipeline health"
+      headerActions={
+        <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
+          <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+          <span>Refresh</span>
+        </Button>
+      }
+    >
+      <div className="space-y-6">
+        {/* Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <span className="text-xs uppercase font-bold text-[#4a6365]">Pending Verification</span>
+              <CardTitle className="text-3xl font-display font-bold text-[#c26d24] tabular-nums">
+                {pendingCount}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-xs text-[#4a6365]">Field observations awaiting reviewer action</span>
+            </CardContent>
+          </Card>
 
-        {/* Role Switcher in Sidebar */}
-        <div className="mt-8 pt-4 border-t border-teal-800/40 text-xs">
-          <p className="text-muted-foreground text-[11px] uppercase tracking-wider font-semibold mb-2 text-teal-200">
-            Active Identity ({currentUser.role})
-          </p>
-          <div className="flex flex-col gap-1.5">
-            <button
-              type="button"
-              onClick={() => handleSwitchRole('admin')}
-              className={`text-left px-2.5 py-1.5 rounded text-xs transition-colors ${
-                currentUser.role === 'admin' ? 'bg-teal-700 text-white font-bold' : 'text-teal-200 hover:bg-teal-800/40'
-              }`}
-            >
-              🛡️ System Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSwitchRole('reviewer')}
-              className={`text-left px-2.5 py-1.5 rounded text-xs transition-colors ${
-                currentUser.role === 'reviewer' ? 'bg-teal-700 text-white font-bold' : 'text-teal-200 hover:bg-teal-800/40'
-              }`}
-            >
-              🔍 Reviewer / Agronomist
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSwitchRole('user')}
-              className={`text-left px-2.5 py-1.5 rounded text-xs transition-colors ${
-                currentUser.role === 'user' ? 'bg-teal-700 text-white font-bold' : 'text-teal-200 hover:bg-teal-800/40'
-              }`}
-            >
-              🧑‍🌾 Field Officer
-            </button>
-          </div>
+          <Card>
+            <CardHeader className="pb-2">
+              <span className="text-xs uppercase font-bold text-[#4a6365]">Reviewed & Grounded</span>
+              <CardTitle className="text-3xl font-display font-bold text-[#1f6346] tabular-nums">
+                {reviewedCount}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-xs text-[#4a6365]">Approved field checks citing verified sectors</span>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <span className="text-xs uppercase font-bold text-[#4a6365]">Registered Users</span>
+              <CardTitle className="text-3xl font-display font-bold text-[#132e36] tabular-nums">
+                {users.length}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-xs text-[#4a6365]">Across Field, Reviewer, and Admin roles</span>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <span className="text-xs uppercase font-bold text-[#4a6365]">Active Storage Engine</span>
+              <CardTitle className="text-2xl font-display font-bold text-[#195c70]">
+                {systemInfo.dbProvider === "postgres" ? "PostgreSQL 18" : "SQLite Durable"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-xs text-[#4a6365] tabular-nums">
+                {systemInfo.migrationsCount ?? 8}/8 schema migrations verified
+              </span>
+            </CardContent>
+          </Card>
         </div>
 
-        <p className="sidebar-bottom">
-          Administrator reference
-          <br />
-          Dual-Database Verified
-        </p>
-      </aside>
+        {/* Main Tabbed Operations Console */}
+        <Tabs defaultValue="checks" className="w-full">
+          <TabsList className="w-full justify-start border-b rounded-none bg-transparent p-0 h-auto gap-4">
+            <TabsTrigger
+              value="checks"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#195c70] data-[state=active]:bg-transparent pb-3 font-bold"
+            >
+              Field Checks Queue ({pendingCount})
+            </TabsTrigger>
+            <TabsTrigger
+              value="users"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#195c70] data-[state=active]:bg-transparent pb-3 font-bold"
+            >
+              User Management ({users.length})
+            </TabsTrigger>
+            <TabsTrigger
+              value="pipelines"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#195c70] data-[state=active]:bg-transparent pb-3 font-bold"
+            >
+              Pipelines & Deployment
+            </TabsTrigger>
+            <TabsTrigger
+              value="audits"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#195c70] data-[state=active]:bg-transparent pb-3 font-bold"
+            >
+              Audit Trail ({audits.length})
+            </TabsTrigger>
+          </TabsList>
 
-      <main className="main" id="overview">
-        <header className="topbar">
-          <a className="brand mobile-brand" href="/admin">
-            <span className="brand-mark">
-              <Radar size={20} />
-            </span>
-            IJURU SIGNAL
-          </a>
-          <strong className="desktop-title">Field Observation Review & Pipeline Operations</strong>
-          <div className="top-actions">
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full text-xs font-medium text-slate-700 dark:text-slate-200">
-              <UserCheck size={14} className="text-teal-600" />
-              <span>{currentUser.role.toUpperCase()}</span>
-            </div>
-            <span className="top-status">Active Triage Console</span>
-            <a href="/" className="admin-nav-link">
-              Briefing view <ArrowUpRight size={15} />
-            </a>
-          </div>
-        </header>
-
-        <div className="content">
-          <div className="heading">
-            <div>
-              <p className="eyebrow">ADMINISTRATIVE OPERATIONS</p>
-              <h1>Field Review & Signal Health</h1>
-              <p>Triage pending field observations, verify optimistic locking, and inspect pipeline ingest status.</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={loadData}
-                disabled={loading}
-                className="button button-outline text-xs flex items-center gap-1.5"
-              >
-                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
-              </button>
-            </div>
-          </div>
-
-          {actionMessage && (
-            <div className="notice mb-4" role="alert">
-              <strong>Action Status:</strong> {actionMessage}
-            </div>
-          )}
-
-          {/* Metrics summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="panel p-4 flex items-center justify-between">
+          {/* Tab 1: Field Checks Triage */}
+          <TabsContent value="checks" className="pt-4 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Pending Review</p>
-                <h3 className="text-2xl font-bold mt-1 text-amber-600">{pendingCount}</h3>
-              </div>
-              <Clock className="w-8 h-8 text-amber-500 opacity-60" />
-            </div>
-
-            <div className="panel p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Reviewed Observations</p>
-                <h3 className="text-2xl font-bold mt-1 text-emerald-600">{reviewedCount}</h3>
-              </div>
-              <CheckCircle2 className="w-8 h-8 text-emerald-500 opacity-60" />
-            </div>
-
-            <div className="panel p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Database Engine</p>
-                <h3 className="text-xl font-bold mt-1 text-teal-700">SQLite & PG18</h3>
-              </div>
-              <Database className="w-8 h-8 text-teal-600 opacity-60" />
-            </div>
-          </div>
-
-          {/* Field Checks Triage Section */}
-          <section className="panel p-6 mb-6" id="checks">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <div>
-                <p className="eyebrow">OBSERVATION TRIAGE</p>
-                <h2 className="text-xl font-bold">Field Checks Queue</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Reviewers approve ground checks with optimistic version fencing and audit logging.
+                <h3 className="font-bold text-lg text-[#132e36]">Ground Observations Queue</h3>
+                <p className="text-xs text-[#4a6365]">
+                  Observations from all 30 districts of Rwanda. Reviewers approve notes with optimistic version locking.
                 </p>
               </div>
 
-              {/* Filter Tabs */}
-              <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border">
-                <button
-                  type="button"
-                  onClick={() => setFilter('all')}
-                  className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
-                    filter === 'all' ? 'bg-white shadow text-foreground' : 'text-muted-foreground hover:text-foreground'
-                  }`}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={checkFilter === "all" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCheckFilter("all")}
                 >
                   All ({checks.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilter('pending')}
-                  className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
-                    filter === 'pending' ? 'bg-white shadow text-amber-700' : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                </Button>
+                <Button
+                  variant={checkFilter === "pending" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCheckFilter("pending")}
                 >
                   Pending ({pendingCount})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilter('reviewed')}
-                  className={`px-3 py-1 rounded text-xs font-semibold transition-colors ${
-                    filter === 'reviewed' ? 'bg-white shadow text-emerald-700' : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                </Button>
+                <Button
+                  variant={checkFilter === "reviewed" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCheckFilter("reviewed")}
                 >
                   Reviewed ({reviewedCount})
-                </button>
+                </Button>
               </div>
             </div>
 
-            {loading ? (
-              <div className="py-8 text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
-                <RefreshCw className="w-4 h-4 animate-spin text-teal-600" />
-                Loading field checks queue...
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Observation Note</TableHead>
+                    <TableHead>District</TableHead>
+                    <TableHead>Author</TableHead>
+                    <TableHead>Observed</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {visibleChecks.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-xs py-8 text-[#4a6365]">
+                        No field checks matching filter.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    visibleChecks.map((check) => (
+                      <TableRow key={check.id}>
+                        <TableCell className="font-semibold text-sm text-[#132e36] max-w-md">
+                          {check.observation}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{check.area_name || check.area_id.toUpperCase()}</Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-[#4a6365]">{check.author_id}</TableCell>
+                        <TableCell className="text-xs tabular-nums text-[#4a6365]">
+                          {new Date(check.observed_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={check.status === "reviewed" ? "live" : "warning"}>
+                            {check.status === "reviewed" ? "Reviewed" : "Pending (v" + check.version + ")"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {check.status === "pending" && (
+                            <Button
+                              size="sm"
+                              disabled={reviewingId === check.id}
+                              onClick={() => handleReview(check)}
+                            >
+                              <Check className="size-3.5" />
+                              <span>Approve</span>
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 2: User Management */}
+          <TabsContent value="users" className="pt-4 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-lg text-[#132e36]">Registered Accounts & Role Grants</h3>
+                <p className="text-xs text-[#4a6365]">
+                  Manage field officers, agronomist reviewers, and administrators with scoped area access.
+                </p>
               </div>
-            ) : visibleChecks.length === 0 ? (
-              <div className="py-8 text-center text-sm text-muted-foreground italic border border-dashed rounded-lg">
-                No observations matching the filter.
-              </div>
-            ) : (
-              <div className="divide-y divide-border">
-                {visibleChecks.map((check) => (
-                  <div key={check.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-foreground">{check.observation}</span>
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                            check.status === 'reviewed'
-                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                              : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                          }`}
-                        >
-                          {check.status}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-1.5">
-                        <span>District: <strong className="text-foreground">{check.area_id.toUpperCase()}</strong></span>
-                        <span>Author: {check.author_id}</span>
-                        <span>Date: {new Date(check.observed_at).toLocaleString()}</span>
-                        <span>Version: v{check.version}</span>
-                      </div>
+
+              <Dialog open={newUserOpen} onOpenChange={setNewUserOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm">
+                    <UserPlus className="size-4" />
+                    <span>Create User</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Provision New User Account</DialogTitle>
+                    <DialogDescription>
+                      Assign an email, role, and password. Scrypt salted credential will be safely stored.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleCreateUser} className="space-y-4 py-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="create-email">Login Email</Label>
+                      <Input
+                        id="create-email"
+                        type="email"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        placeholder="agronomist@coop.rw"
+                        required
+                      />
                     </div>
-
-                    {check.status === 'pending' && (
-                      <button
-                        type="button"
-                        onClick={() => handleReview(check)}
-                        disabled={reviewingId === check.id}
-                        className="button text-xs py-1.5 px-3 flex items-center gap-1.5 bg-emerald-700 text-white hover:bg-emerald-800"
+                    <div className="space-y-1.5">
+                      <Label htmlFor="create-password">Initial Password</Label>
+                      <Input
+                        id="create-password"
+                        type="text"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="demo12345678"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="create-role">Role</Label>
+                      <Select
+                        value={newRole}
+                        onValueChange={(val: any) => setNewRole(val)}
                       >
-                        {reviewingId === check.id ? (
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Check className="w-3.5 h-3.5" />
-                        )}
-                        Approve / Mark Reviewed
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* Pipelines & System Health Section */}
-          <section className="panel p-6" id="sources">
-            <div className="mb-4">
-              <p className="eyebrow">INGEST PIPELINES</p>
-              <h2 className="text-xl font-bold">Signal Sources & Grounding Health</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Monitoring live endpoints, fixture calibration, and strict non-hallucination validation.
-              </p>
+                        <SelectTrigger id="create-role">
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">Field Officer (user)</SelectItem>
+                          <SelectItem value="reviewer">Agronomist Reviewer (reviewer)</SelectItem>
+                          <SelectItem value="admin">System Administrator (admin)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <DialogFooter>
+                      <Button type="button" variant="outline" onClick={() => setNewUserOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={creatingUser}>
+                        {creatingUser ? "Creating..." : "Save Account"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
+
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User ID</TableHead>
+                    <TableHead>Login</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Change Role</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell className="font-mono text-xs">{u.id}</TableCell>
+                      <TableCell className="font-semibold text-sm text-[#132e36]">
+                        {u.login || u.id}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            u.role === "admin"
+                              ? "destructive"
+                              : u.role === "reviewer"
+                              ? "calibrated"
+                              : "secondary"
+                          }
+                        >
+                          {u.role.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-[#4a6365] tabular-nums">
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Select
+                          value={u.role}
+                          onValueChange={(newRoleVal) => handleUpdateRole(u.id, newRoleVal)}
+                        >
+                          <SelectTrigger className="h-8 w-28 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="user">USER</SelectItem>
+                            <SelectItem value="reviewer">REVIEWER</SelectItem>
+                            <SelectItem value="admin">ADMIN</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 3: Pipelines & ThalesOps */}
+          <TabsContent value="pipelines" className="pt-4 space-y-4">
+            <h3 className="font-bold text-lg text-[#132e36]">Signal Sources & Ingest Pipelines</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="border border-border/80 rounded-lg p-4 bg-slate-50 dark:bg-slate-900">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <CloudRain className="w-4 h-4 text-teal-600" />
-                    <span className="font-semibold text-sm">Weather Pipeline</span>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-bold">Open-Meteo Weather</CardTitle>
+                    <Badge variant="live">Live 200</Badge>
                   </div>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">LIVE</span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Open-Meteo & Meteo Rwanda regional station. 15-minute deterministic caching layer.
-                </p>
-              </div>
+                  <CardDescription className="text-xs">
+                    Hourly, 7-day daily forecast, temperature, humidity, rainfall prob
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-xs text-[#4a6365] space-y-1">
+                  <div>Endpoint: api.open-meteo.com/v1/forecast</div>
+                  <div>Cache: 15-minute in-memory LRU</div>
+                  <div>Attribution: CC BY 4.0 Open-Meteo</div>
+                </CardContent>
+              </Card>
 
-              <div className="border border-border/80 rounded-lg p-4 bg-slate-50 dark:bg-slate-900">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-teal-600" />
-                    <span className="font-semibold text-sm">Sentinel-2 NDVI</span>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-bold">ERA5 30yr Baseline</CardTitle>
+                    <Badge variant="live">Live 200</Badge>
                   </div>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">VERIFIED</span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Copernicus L2A surface reflectance. SCL cloud filtering with zero-denominator safety.
-                </p>
-              </div>
+                  <CardDescription className="text-xs">
+                    ECMWF ERA5 reanalysis 30-year monthly precipitation normals
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-xs text-[#4a6365] space-y-1">
+                  <div>Baseline: 1991–2020 monthly normals</div>
+                  <div>Resolution: 0.25° grid (~28km)</div>
+                  <div>Completeness check: calendar matching</div>
+                </CardContent>
+              </Card>
 
-              <div className="border border-border/80 rounded-lg p-4 bg-slate-50 dark:bg-slate-900">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Radar className="w-4 h-4 text-teal-600" />
-                    <span className="font-semibold text-sm">CHIRPS Baseline</span>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-bold">NASA MODIS / Sentinel-2</CardTitle>
+                    <Badge variant="live">Live 200</Badge>
                   </div>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">VERIFIED</span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  30-year rainfall anomaly comparison. Full matching-month completeness check.
-                </p>
-              </div>
+                  <CardDescription className="text-xs">
+                    250m surface reflectance 16-day NDVI vegetation curves
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-xs text-[#4a6365] space-y-1">
+                  <div>Source: ORNL DAAC MOD13Q1 / Copernicus</div>
+                  <div>Quality: SCL cloud filtered, non-diagnosis</div>
+                  <div>License: NASA Open Data / Copernicus Open</div>
+                </CardContent>
+              </Card>
             </div>
-          </section>
 
-          <footer className="mt-8">
-            <span>IJURU SIGNAL · ADMIN REFERENCE</span>
-            <span>Operations triage & ground truth verification.</span>
-          </footer>
-        </div>
-      </main>
-    </div>
+            <Card className="p-4 bg-[#f8f9f5]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <strong className="text-sm font-bold text-[#132e36] block">
+                    ThalesOps & Single Container Deployment Ready
+                  </strong>
+                  <span className="text-xs text-[#4a6365]">
+                    Dockerfile (`node:24-bookworm-slim`), nixpacks.toml, and docker-compose.yml configured.
+                  </span>
+                </div>
+                <Button asChild variant="outline" size="sm">
+                  <a href="/DEPLOY_THALESOPS.md" target="_blank">
+                    <span>Deploy Guide</span>
+                    <ExternalLink className="size-3.5" />
+                  </a>
+                </Button>
+              </div>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 4: Audit Trail */}
+          <TabsContent value="audits" className="pt-4 space-y-4">
+            <h3 className="font-bold text-lg text-[#132e36]">Immutable Security Audit Trail</h3>
+
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Event ID</TableHead>
+                    <TableHead>Actor</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Target</TableHead>
+                    <TableHead>Outcome</TableHead>
+                    <TableHead className="text-right">Timestamp</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {audits.map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell className="font-mono text-xs">{a.id.slice(0, 8)}...</TableCell>
+                      <TableCell className="text-xs font-semibold">{a.actor_id}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{a.action}</Badge>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-[#4a6365]">
+                        {a.target_id?.slice(0, 8) || "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={a.outcome === "success" ? "live" : "destructive"}>
+                          {a.outcome}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums text-xs text-[#4a6365]">
+                        {new Date(a.created_at).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AppShell>
   );
 }

@@ -124,8 +124,35 @@ Completed 100% migration from JavaScript (`.mjs`) to TypeScript (`.ts`) and impl
   - `AdminWorkspace` (`/admin`): Real observation review queue with filter tabs (`all`, `pending`, `reviewed`), one-click "Approve / Mark Reviewed" action, and live signal pipeline health indicators.
   - `CopilotChat`: Interactive chat widget with quick suggestion pills (`5-day rainfall forecast`, `Planting & crop advice`, `Sentinel-2 NDVI analysis`, `Official Meteo advisory`) and grounded citations badge.
 - **Build & Verification**:
-  - `pnpm build` verified all 11 static and dynamic routes compile cleanly with zero TypeScript or webpack errors.
+  - `pnpm build` verified all routes compile cleanly with zero TypeScript or webpack errors.
   - Tested curl requests against live Next.js server on `/api/areas`, `/api/signals/bugesera`, `/api/field-checks`, and `/api/ai/chat`.
+
+### Production SaaS Redesign, 30-District Interactive Map & Turnkey Render Deployment — 31 October 2026
+
+Completed production SaaS upgrade, full Shadcn UI system, 30-district interactive choropleth, all App Router routes, and single-container Render / ThalesOps deployment:
+- **UI & Design System**:
+  - Upgraded to Tailwind v4 (`tailwindcss@^4`, `@tailwindcss/postcss@^4`, `tw-animate-css`) with ink-and-teal palette (`#132e36` deep forest ink, `#195c70` lake teal, `#f3f4ee` paper, `#e3ed8c` signal yellow) and custom typography (`DM Serif Display` + `Manrope`).
+  - Built comprehensive Shadcn component suite in `components/ui/` (`alert`, `badge`, `button`, `card`, `dialog`, `dropdown-menu`, `input`, `label`, `scroll-area`, `select`, `separator`, `skeleton`, `switch`, `table`, `tabs`, `textarea`, `tooltip`).
+  - Implemented `AppShell` with desktop navigation sidebar, mobile bottom bar, open-access guest indicator, and instant role switcher (`user`, `reviewer`, `admin`).
+- **30-District Interactive Map & Layers**:
+  - Downloaded authoritative simplified NISR / geoBoundaries ADM2 GeoJSON to `public/data/rwanda-adm2.geojson`.
+  - Built `RwandaMap` interactive SVG choropleth covering all 30 districts with 4 toggleable climate layers: Precipitation Forecast, Canopy NDVI (MODIS), 30-Year Rainfall Anomaly (ERA5), and Root-Zone Soil Moisture.
+  - Added MapLibre GL + OpenStreetMap basemap toggle alongside accessible WCAG 2.1 AA sortable table for map-free navigation.
+- **Dedicated App Router Pages**:
+  - `/`: National 30-district interactive map, weather outlook, key indicators, field observation preview, and embedded copilot.
+  - `/places/[slug]`: Deep district briefing with agro-ecological profiles, elevation, primary crops, and localized AI synthesis.
+  - `/field-checks`: Dedicated observations triage, ground-truthing, and reviewer audit queue.
+  - `/assistant`: Dedicated full-page Climate AI Copilot with district selector and OpenRouter live streaming/fallback.
+  - `/admin`: Operations hub with user list, audit logs, and field check approval workflows.
+  - `/sign-in` & `/sign-up`: Clean authentication forms with 1-click guest role bypass.
+- **Single-Container Docker & Render Setup**:
+  - Created root `Dockerfile` (`node:24-bookworm-slim`) and entrypoint script `scripts/docker-entrypoint.sh` executing automatic migrations, auto-seeding, and `next start -p "${PORT:-3000}" -H 0.0.0.0`.
+  - Serves both frontend UI and backend API routes in a single container.
+  - Auto-detects PostgreSQL when `DATABASE_URL` is set, or defaults to zero-cost local SQLite (`/app/data/app.sqlite`).
+  - Created `render.yaml` blueprint and comprehensive deployment guide `DEPLOY_RENDER.md`.
+- **Verification**:
+  - 38/38 unit and parity tests pass with 0 failures (`pnpm test`).
+  - Next.js production build (`pnpm build`) succeeds across all 18 routes.
 
 
 

@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: ijuru-signal
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ADMIN_INITIAL_PASSWORD
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: AUTO_SEED
+        value: "true"
+      - key: SQLITE_PATH
+        value: /app/data/app.sqlite
+    disk:
+      name: ijuru-data
+      mountPath: /app/data
+      sizeGB: 1

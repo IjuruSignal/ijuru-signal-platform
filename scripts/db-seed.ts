@@ -1,16 +1,53 @@
+import fs from 'node:fs';
 import { openDatabase, migrate as migrateSqlite } from '../server/db/sqlite.ts';
 import { createPool, migrate as migratePostgres, withTransaction } from '../server/db/postgres.ts';
 import { setCredential } from '../server/auth/sqlite.ts';
 import { setCredential as setCredentialPg } from '../server/auth/postgres.ts';
 import { loadConfig, type AppConfig } from '../server/config/index.ts';
 
-export const DISTRICTS = [
-  { id: 'kigali', name: 'Kigali', coordinates: [[[30.0, -1.9], [30.15, -1.9], [30.15, -2.05], [30.0, -2.05], [30.0, -1.9]]] },
-  { id: 'bugesera', name: 'Bugesera', coordinates: [[[30.05, -2.1], [30.3, -2.1], [30.3, -2.4], [30.05, -2.4], [30.05, -2.1]]] },
-  { id: 'musanze', name: 'Musanze', coordinates: [[[29.55, -1.45], [29.75, -1.45], [29.75, -1.65], [29.55, -1.65], [29.55, -1.45]]] },
-  { id: 'rubavu', name: 'Rubavu', coordinates: [[[29.22, -1.62], [29.35, -1.62], [29.35, -1.78], [29.22, -1.78], [29.22, -1.62]]] },
-  { id: 'nyagatare', name: 'Nyagatare', coordinates: [[[30.2, -1.2], [30.5, -1.2], [30.5, -1.5], [30.2, -1.5], [30.2, -1.2]]] },
-];
+export interface SeedDistrict {
+  id: string;
+  name: string;
+  coordinates: number[][][];
+}
+
+function loadFeaturedDistricts(): SeedDistrict[] {
+  const geojsonPath = new URL('../public/data/rwanda-adm2.geojson', import.meta.url);
+  const geojson = JSON.parse(fs.readFileSync(geojsonPath, 'utf8'));
+
+  const featureMap = new Map<string, any>();
+  for (const f of geojson.features) {
+    if (f.properties?.id) {
+      featureMap.set(f.properties.id.toLowerCase(), f);
+    }
+  }
+
+  // 8 featured districts; kigali uses gasabo polygon as national urban hub
+  const featuredDefs = [
+    { id: 'kigali', name: 'Kigali', sourceId: 'gasabo' },
+    { id: 'bugesera', name: 'Bugesera', sourceId: 'bugesera' },
+    { id: 'musanze', name: 'Musanze', sourceId: 'musanze' },
+    { id: 'rubavu', name: 'Rubavu', sourceId: 'rubavu' },
+    { id: 'nyagatare', name: 'Nyagatare', sourceId: 'nyagatare' },
+    { id: 'huye', name: 'Huye', sourceId: 'huye' },
+    { id: 'karongi', name: 'Karongi', sourceId: 'karongi' },
+    { id: 'kayonza', name: 'Kayonza', sourceId: 'kayonza' },
+  ];
+
+  return featuredDefs.map(({ id, name, sourceId }) => {
+    const feature = featureMap.get(sourceId);
+    if (!feature || !feature.geometry?.coordinates) {
+      throw new Error(`Failed to find geometry for featured district ${sourceId}`);
+    }
+    return {
+      id,
+      name,
+      coordinates: feature.geometry.coordinates as number[][][],
+    };
+  });
+}
+
+export const DISTRICTS: SeedDistrict[] = loadFeaturedDistricts();
 
 export const DEMO_USERS = [
   { id: 'user-admin-01', login: 'admin@ijuru.rw', role: 'admin' as const },
@@ -64,6 +101,51 @@ export const SAMPLE_CHECKS = [
     status: 'pending' as const,
     version: 1,
     observedAt: '2026-10-31T10:45:00.000Z',
+  },
+  {
+    id: 'fc-06',
+    areaId: 'huye',
+    authorId: 'user-field-01',
+    observation: 'Ngoma sector terraced coffee parcels inspected; flowering uniform following seasonal onset rains, mulch layer intact.',
+    status: 'reviewed' as const,
+    version: 2,
+    observedAt: '2026-10-30T16:00:00.000Z',
+  },
+  {
+    id: 'fc-07',
+    areaId: 'karongi',
+    authorId: 'user-field-01',
+    observation: 'Bwishyura lakeside steep slopes inspected; stone bunds holding well against surface runoff with no gully formation.',
+    status: 'reviewed' as const,
+    version: 2,
+    observedAt: '2026-10-31T07:30:00.000Z',
+  },
+  {
+    id: 'fc-08',
+    areaId: 'kayonza',
+    authorId: 'user-field-01',
+    observation: 'Mukarange marshland perimeter canals checked; irrigation flow steady into valley rice paddies.',
+    status: 'pending' as const,
+    version: 1,
+    observedAt: '2026-10-31T11:20:00.000Z',
+  },
+  {
+    id: 'fc-09',
+    areaId: 'musanze',
+    authorId: 'user-field-01',
+    observation: 'Kinigi pyrethrum cooperatives report vigorous vegetative canopy; no visible frost or erosion damage.',
+    status: 'pending' as const,
+    version: 1,
+    observedAt: '2026-10-31T12:00:00.000Z',
+  },
+  {
+    id: 'fc-10',
+    areaId: 'bugesera',
+    authorId: 'user-field-01',
+    observation: 'Mayange sector cassava plantations show good root establishment; supplementary drip irrigation advised if dry spell extends.',
+    status: 'reviewed' as const,
+    version: 2,
+    observedAt: '2026-10-31T13:10:00.000Z',
   },
 ];
 
@@ -202,7 +284,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(`Seeding ${config.db.provider} database (${target})...`);
   await seedDatabase({ config });
   console.log('✓ Seeding complete:');
-  console.log('  - 5 Districts & Boundaries (Kigali, Bugesera, Musanze, Rubavu, Nyagatare)');
+  console.log('  - 8 Featured Districts & Real Boundaries (Kigali, Bugesera, Musanze, Rubavu, Nyagatare, Huye, Karongi, Kayonza)');
   console.log('  - 3 Demo Users: admin@ijuru.rw, reviewer@ijuru.rw, field@ijuru.rw (Password: demo12345678)');
-  console.log('  - 5 Realistic Field Checks (reviewed & pending)');
+  console.log(`  - ${SAMPLE_CHECKS.length} Realistic Field Checks (reviewed & pending)`);
 }

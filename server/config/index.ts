@@ -72,8 +72,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     throw new Error(`Invalid NODE_ENV: must be development, production, or test`);
   }
 
-  // Database configuration
-  const dbProvider = env.DB_PROVIDER || 'sqlite';
+  // Database configuration (auto-detect postgres if DATABASE_URL is present)
+  const dbProvider = env.DB_PROVIDER || (env.DATABASE_URL ? 'postgres' : 'sqlite');
   if (!['sqlite', 'postgres'].includes(dbProvider)) {
     throw new Error(`Invalid DB_PROVIDER: must be sqlite or postgres`);
   }
@@ -108,29 +108,18 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   }
 
   // AI Provider configuration
-  const aiProvider = env.AI_PROVIDER || 'disabled';
-  if (!['disabled', 'openai-compatible', 'anthropic'].includes(aiProvider)) {
-    throw new Error(`Invalid AI_PROVIDER: must be disabled, openai-compatible, or anthropic`);
-  }
+  const rawAiProvider = env.AI_PROVIDER?.trim();
+  const openrouterApiKey = env.OPENROUTER_API_KEY?.trim();
+  const generalApiKey = env.AI_API_KEY?.trim();
 
   let ai: AiConfig;
-  if (aiProvider === 'disabled') {
-    ai = Object.freeze({ provider: 'disabled' });
-  } else {
-    const model = env.AI_MODEL;
-    if (!model || typeof model !== 'string' || !model.trim()) {
-      throw new Error('AI_MODEL is required when AI_PROVIDER is enabled');
-    }
 
-    const apiKey = env.AI_API_KEY;
-    if (!apiKey || typeof apiKey !== 'string' || !apiKey.trim()) {
-      throw new Error('AI_API_KEY is required when AI_PROVIDER is enabled');
-    }
-
-    const rawBaseUrl = env.AI_BASE_URL;
-    if (!rawBaseUrl || typeof rawBaseUrl !== 'string') {
-      throw new Error('AI_BASE_URL is required when AI_PROVIDER is enabled');
-    }
+  // Simplified OpenRouter / OpenAI-compatible shortcut:
+  // If AI_PROVIDER is not explicitly set (or is empty), but OPENROUTER_API_KEY or AI_API_KEY is provided
+  if (!rawAiProvider && (openrouterApiKey || generalApiKey)) {
+    const apiKey = (openrouterApiKey || generalApiKey)!;
+    const model = env.AI_MODEL?.trim() || 'google/gemini-2.5-flash';
+    const rawBaseUrl = env.AI_BASE_URL?.trim() || 'https://openrouter.ai/api';
 
     let url: URL;
     try {
@@ -143,7 +132,10 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
       throw new Error('AI_BASE_URL must not contain credentials, query parameters, or hash');
     }
 
-    const allowedHosts = parseAllowedHosts(env.AI_ALLOWED_HOSTS);
+    const allowedHosts = env.AI_ALLOWED_HOSTS
+      ? parseAllowedHosts(env.AI_ALLOWED_HOSTS)
+      : ['openrouter.ai', 'api.openai.com'];
+
     if (!allowedHosts.includes(url.hostname)) {
       throw new Error(`AI_BASE_URL host '${url.hostname}' is not in AI_ALLOWED_HOSTS`);
     }
@@ -162,15 +154,79 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     const maxOutputTokens = parseInteger(env.AI_MAX_OUTPUT_TOKENS, 1024, 1, 4096, 'AI_MAX_OUTPUT_TOKENS');
 
     ai = Object.freeze({
-      provider: aiProvider as 'openai-compatible' | 'anthropic',
-      model: model.trim(),
-      apiKey: apiKey.trim(),
+      provider: 'openai-compatible',
+      model,
+      apiKey,
       baseUrl: url.toString().replace(/\/$/, ''),
       allowedHosts: Object.freeze(allowedHosts),
       timeoutMs,
       maxOutputTokens,
       allowLocalHttp: isLocalHttpAllowed,
     });
+  } else {
+    const aiProvider = rawAiProvider || 'disabled';
+    if (!['disabled', 'openai-compatible', 'anthropic'].includes(aiProvider)) {
+      throw new Error(`Invalid AI_PROVIDER: must be disabled, openai-compatible, or anthropic`);
+    }
+
+    if (aiProvider === 'disabled') {
+      ai = Object.freeze({ provider: 'disabled' });
+    } else {
+      const model = env.AI_MODEL;
+      if (!model || typeof model !== 'string' || !model.trim()) {
+        throw new Error('AI_MODEL is required when AI_PROVIDER is enabled');
+      }
+
+      const apiKey = env.AI_API_KEY;
+      if (!apiKey || typeof apiKey !== 'string' || !apiKey.trim()) {
+        throw new Error('AI_API_KEY is required when AI_PROVIDER is enabled');
+      }
+
+      const rawBaseUrl = env.AI_BASE_URL;
+      if (!rawBaseUrl || typeof rawBaseUrl !== 'string') {
+        throw new Error('AI_BASE_URL is required when AI_PROVIDER is enabled');
+      }
+
+      let url: URL;
+      try {
+        url = new URL(rawBaseUrl);
+      } catch (err: any) {
+        throw new Error(`Invalid AI_BASE_URL: ${err.message}`);
+      }
+
+      if (url.username || url.password || url.hash || url.search) {
+        throw new Error('AI_BASE_URL must not contain credentials, query parameters, or hash');
+      }
+
+      const allowedHosts = parseAllowedHosts(env.AI_ALLOWED_HOSTS);
+      if (!allowedHosts.includes(url.hostname)) {
+        throw new Error(`AI_BASE_URL host '${url.hostname}' is not in AI_ALLOWED_HOSTS`);
+      }
+
+      const isLocalHttpAllowed =
+        nodeEnv !== 'production' &&
+        env.AI_ALLOW_LOCAL_HTTP === 'true' &&
+        url.protocol === 'http:' &&
+        ['localhost', '127.0.0.1', '::1', '[::1]'].includes(url.hostname);
+
+      if (url.protocol !== 'https:' && !isLocalHttpAllowed) {
+        throw new Error('AI_BASE_URL requires HTTPS protocol');
+      }
+
+      const timeoutMs = parseInteger(env.AI_TIMEOUT_MS, 30000, 1, 120000, 'AI_TIMEOUT_MS');
+      const maxOutputTokens = parseInteger(env.AI_MAX_OUTPUT_TOKENS, 1024, 1, 4096, 'AI_MAX_OUTPUT_TOKENS');
+
+      ai = Object.freeze({
+        provider: aiProvider as 'openai-compatible' | 'anthropic',
+        model: model.trim(),
+        apiKey: apiKey.trim(),
+        baseUrl: url.toString().replace(/\/$/, ''),
+        allowedHosts: Object.freeze(allowedHosts),
+        timeoutMs,
+        maxOutputTokens,
+        allowLocalHttp: isLocalHttpAllowed,
+      });
+    }
   }
 
   // Auth configuration
