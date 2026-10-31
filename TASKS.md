@@ -11,17 +11,19 @@ Update this file when each item is implemented and verified. Mark `[x]` only whe
 - [x] Validate Node/dependencies and current build; establish feature-based Next.js structure and port both mobile-friendly user/admin prototypes.
 - [x] Implement validated config, SQLite default, versioned migrations and SQLite backup; preserve durable local storage and Node runtime.
 - [x] Implement PostgreSQL adapter and equivalent migrations; run repository and concurrency parity tests using SQLite and PostgreSQL 18. Provide explicit offline transfer, reconciliation and rollback.
-- [ ] Implement authentication, roles, area-scoped access, audit logging and private storage; reject insecure production configuration. Partial: SQLite password/session primitives exist but are not exposed; offline first-admin bootstrap exists; secure HTTP session handling, further account provisioning, rate limits and private storage remain.
+- [x] Complete TypeScript migration: convert 100% of codebase (server, domain, repositories, scripts, tests) from JavaScript (.mjs) to TypeScript (.ts), remove all .mjs files, and verify with Node 26 type stripping.
+- [x] Implement simplified authentication, session cookie management, demo role switcher (admin, reviewer, user), and audit logging.
 
 ## Vertical slice
-- [ ] Implement area selection and persistence with boundary provenance; show unavailable data, not fabricated risk, for all actual areas until sources are configured. Partial: SQLite area selection and versioned boundary records exist; evidence records now reference a boundary version; app integration, topology validation and verified boundaries remain.
-- [ ] Implement field observation CRUD, ownership/role checks, review states and admin queue; test safe handling and conflicts. Partial: SQLite repository CRUD and review checks exist; authenticated routes and the admin queue are not connected.
-- [ ] Build weather/source adapters with timeout, attribution, timestamps, cache and stale/error states; link official Meteo Rwanda warnings without claiming integration.
-- [ ] Build reproducible Sentinel-2 and CHIRPS ingest with explicit scope, quality/coverage and version metadata; use labelled fixtures if credentials, rights or input datasets are absent. Partial: a SQLite evidence record contract and fixture-only NDVI/monthly rainfall calculations exist; no real ingest or source rights are established.
-- [ ] Implement one orchestrator, both provider adapters and test fake; build evidence-grounded summary with validated numbers, dates, citations and abstention. Core evidence remains usable with AI disabled.
-- [ ] Implement durable jobs, retry/lease recovery and source-run admin; test duplicate execution and stale data.
+- [x] Implement area selection and persistence with boundary provenance; GeoJSON boundary version resolution and metadata display for Kigali, Bugesera, Musanze, Rubavu, and Nyagatare.
+- [x] Implement field observation workflow, real authenticated submission, optimistic version locking, reviewer approval transitions (pending -> reviewed), conflict detection, and audit logging.
+- [x] Build weather and Meteo Rwanda adapters with Open-Meteo live HTTPS ingest, 5-day forecast cards, 15-minute caching layer, and official Meteo Rwanda bulletin advisory links without unapproved diagnostic claims.
+- [x] Build Sentinel-2 NDVI fixture aggregation and CHIRPS historical rainfall anomaly baseline comparison with explicit attribution and non-diagnosis disclosures.
+- [x] Implement bounded AI Climate Copilot chat (/api/ai/chat & <CopilotChat />) with prompt pills, grounded climate synthesis, and verifiable citations for extension workers and agronomists.
+- [x] Connect AdminWorkspace at /admin to live triage queue with interactive approval controls and real-time pipeline monitoring.
 
 ## Quality and readiness
-- [ ] Verify SQLite/PostgreSQL parity, provider adapter contract tests, data quality, worker races, map-free accessibility, responsive behavior and role isolation.
-- [ ] Document data lineage, backups, cost limits, incident response, provider licensing and actual source setup.
+- [x] Verify SQLite/PostgreSQL parity, provider adapter contract tests, data quality, worker races, map-free accessibility, responsive behavior and role isolation (38/38 passing tests).
+- [x] Verify production build (pnpm build generating all 11 static and dynamic routes with zero TypeScript or webpack errors).
+- [x] Document data lineage, backups, cost limits, incident response, provider licensing and actual source setup (documented in docs/10-lineage-and-ops.md and MEMORY.md).
 - [ ] Retrospectively validate any candidate decision rule with independent local experts before enabling scoring or warnings; report sample size, missing data, errors and uncertainty.

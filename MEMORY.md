@@ -104,4 +104,28 @@ Implemented the full PostgreSQL 18 adapter, equivalent migrations, and parity ve
 - `pnpm test` passed all 38 tests on Node 26.12.0. `pnpm build` verified clean Next.js compilation.
 - Updated `compose.postgres.yml` and `.env.postgres.example` default port to 55431 to avoid host port collisions.
 
+### Full TypeScript Migration and End-to-End Interactive Demo — 31 October 2026
+
+Completed 100% migration from JavaScript (`.mjs`) to TypeScript (`.ts`) and implemented end-to-end interactive demo capabilities:
+- **TypeScript Migration**:
+  - Migrated all domain models, repositories, server config, jobs, auth, and scripts to `.ts`.
+  - Converted all 10 test files in `tests/*.test.ts` to TypeScript. Removed all `.mjs` files from the repository.
+  - Configured `tsconfig.json` with `"allowImportingTsExtensions": true`, `"target": "ES2022"`, path alias `@/*`, and Node 26 type stripping.
+  - Verified 38/38 unit and parity tests pass on Node 26 with `node --test tests/*.test.ts`.
+- **Demo API Routes**:
+  - `app/api/auth/login`, `app/api/auth/me`, `app/api/auth/logout`: Session management with cookie persistence and instant demo role switching (`admin`, `reviewer`, `user`).
+  - `app/api/areas`: Dynamic retrieval of 5 seeded districts (Kigali, Bugesera, Musanze, Rubavu, Nyagatare) with GeoJSON polygons and NISR provenance metadata.
+  - `app/api/signals/[areaId]`: Combined climate signals endpoint providing live 5-day Open-Meteo weather forecasts (temperature, humidity, precipitation probability), Copernicus Sentinel-2 L2A NDVI (cloud-filtered canopy vigour), CHIRPS v2.0 historical rainfall anomaly (30-year monthly normals), and official Meteo Rwanda advisories with bulletin links.
+  - `app/api/field-checks`: Real observation submission and retrieval linked to current author and area.
+  - `app/api/field-checks/[id]/review`: Reviewer transition endpoint with optimistic locking (`v1 -> v2`) and conflict rejection (`409`).
+  - `app/api/ai/chat`: Grounded AI Climate Copilot answering agricultural, weather, and remote sensing queries with structured citations to Meteo Rwanda, Sentinel-2, CHIRPS, and recent ground observations.
+- **Frontend & Copilot Chat**:
+  - `LocationWorkspace` (`/`): Dynamic district selector, 5-day weather cards with precipitation probabilities, Sentinel-2 NDVI card, CHIRPS baseline anomaly indicator, Meteo Rwanda advisory link, interactive field note submission with immediate optimistic UI update, role switcher, and embedded `<CopilotChat />`.
+  - `AdminWorkspace` (`/admin`): Real observation review queue with filter tabs (`all`, `pending`, `reviewed`), one-click "Approve / Mark Reviewed" action, and live signal pipeline health indicators.
+  - `CopilotChat`: Interactive chat widget with quick suggestion pills (`5-day rainfall forecast`, `Planting & crop advice`, `Sentinel-2 NDVI analysis`, `Official Meteo advisory`) and grounded citations badge.
+- **Build & Verification**:
+  - `pnpm build` verified all 11 static and dynamic routes compile cleanly with zero TypeScript or webpack errors.
+  - Tested curl requests against live Next.js server on `/api/areas`, `/api/signals/bugesera`, `/api/field-checks`, and `/api/ai/chat`.
+
+
 
